@@ -23,13 +23,13 @@
     "license": "ISC",
     "devDependencies": {
         "@dotenvx/dotenvx": "^1.44.2",
-        "@types/node": "^22.14.1",
-        "nodemon": "^3.1.10",
-        "tsc-alias": "^1.8.16",
-        "tsconfig-paths": "^3.11.0"
+        "@types/node": "^22.14.1"
     },
     "dependencies": {
         "commander": "^14.0.0",
+        "nodemon": "^3.1.10",
+        "tsc-alias": "^1.8.16",
+        "tsconfig-paths": "^3.11.0",
         "concurrently": "^9.2.1"
     }
 }
