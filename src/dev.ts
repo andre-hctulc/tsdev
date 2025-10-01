@@ -12,7 +12,7 @@ export const DefaultDevOptions: Required<DevOptions> = {
     ...DefaultBuildOptions,
     ...DefaultStartOptions,
     ...DefaultWatchOptions,
-    nodeOptions: ["--inspect"],
+    nodeOptions: [],
     nodemonOptions: [],
 };
 
@@ -41,7 +41,7 @@ export async function dev(userOptions: DevOptions) {
 
     const tscArgs = ["--watch", "--incremental", ...propagateOptions(tscOptions)];
 
-    const nodeArgs = ["--inspect", ...propagateOptions(nodeOptions), mainFile];
+    const nodeArgs = ["--inspect", ...propagateOptions(nodeOptions)];
 
     let currentAbortController: AbortController | null = null;
     let started = false;
