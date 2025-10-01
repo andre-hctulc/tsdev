@@ -24,7 +24,10 @@ export const DevCliOptions: CLIOptionsDef<DevOptions> = {
 };
 
 export async function dev(userOptions: DevOptions) {
-    const { nodeOptions, dir, tscOptions, nodemonOptions, main } = { ...DefaultDevOptions, ...userOptions };
+    const { nodeOptions, dir, tscOptions, nodemonOptions, main, tscAliasOptions } = {
+        ...DefaultDevOptions,
+        ...userOptions,
+    };
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
     const pkg = loadConfig<PackageJSONMin>(dir, "package.json");
     const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
@@ -33,14 +36,13 @@ export async function dev(userOptions: DevOptions) {
     const tscArgs = ["--watch", "--incremental", ...propagateOptions(tscOptions)];
 
     const nodeArgs = [...propagateOptions(nodeOptions), mainFile];
-    if (paths.length) {
-        nodeArgs.unshift("-r tsconfig-paths/register");
-    }
+    const tscAliasArgs = [...propagateOptions(tscAliasOptions)];
 
     const nodemonArgs = [
         "--delay 1.5",
         ...propagateOptions(nodemonOptions),
-        `--exec "node ${nodeArgs.join(" ")}"`,
+        // tsconfig-paths wont work with es modules and node/nodemon
+        `--exec "npx tsc-alias ${tscAliasArgs.join(" ")} && node ${nodeArgs.join(" ")}"`,
     ];
 
     concurrently([

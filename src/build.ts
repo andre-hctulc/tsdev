@@ -75,7 +75,6 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
         errorExit(`TypeScript compilation failed with exit code ${compiled}.`);
     }
 
-    // In watch mode we use tsconfig-paths at run level
     if (paths.length) {
         // tsc-alias
         const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {

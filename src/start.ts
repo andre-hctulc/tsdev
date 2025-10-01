@@ -1,4 +1,4 @@
-import type { CLIOptionsDef, PackageJSONMin, TSConfigMin } from "./types.js";
+import type { CLIOptionsDef, PackageJSONMin } from "./types.js";
 import { loadConfig, proc, errorLog, successLog, propagateOptions } from "./util.js";
 
 export interface StartOptions {
@@ -26,21 +26,11 @@ export async function start(userOptions: StartOptions) {
     const { dir, main, nodeOptions } = { ...StartRunOptions, ...userOptions };
     const pkgJson = loadConfig<PackageJSONMin>(dir, "package.json");
     const runFile = userOptions?.main || pkgJson.name || main;
-    const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
-    const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
 
     // TS Compile
-    const runProc = proc(
-        "node",
-        [
-            ...(paths.length ? ["-r", "tsconfig-paths/register"] : []),
-            ...propagateOptions(nodeOptions),
-            runFile,
-        ],
-        {
-            cwd: dir,
-        }
-    );
+    const runProc = proc("node", [...propagateOptions(nodeOptions), runFile], {
+        cwd: dir,
+    });
 
     runProc.on("exit", (code) => {
         if (code !== 0) {
