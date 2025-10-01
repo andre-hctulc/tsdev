@@ -14,12 +14,6 @@ Build the app.
 npx @dre44/nest-dev build
 ```
 
-Build in watch mode.
-
-```bash
-npx @dre44/nest-dev watch
-```
-
 Start the app.
 
 ```bash

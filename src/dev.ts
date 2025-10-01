@@ -22,6 +22,7 @@ export async function dev(userOptions: DevOptions) {
 
     let preAbortController: AbortController | null = null;
     let started = false;
+    // always add --watch to tsc options
     await build({ ...userOptions, tscOptions: ["--watch", ...(userOptions.tscOptions || [])] });
 
     await watch({
