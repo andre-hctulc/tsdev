@@ -5,18 +5,12 @@ export interface StartOptions {
     dir?: string;
     main?: string;
     nodeOptions?: string[];
-    _abortSignal?: AbortSignal;
-    _watchMode?: boolean;
-    _tsConfig: TSConfigMin;
 }
 
 export const StartRunOptions: Required<StartOptions> = {
     dir: process.cwd(),
     main: "dist/main.js",
     nodeOptions: [],
-    _abortSignal: new AbortController().signal,
-    _watchMode: false,
-    _tsConfig: {},
 };
 
 export const StartCliOptions: CLIOptionsDef<StartOptions> = {
@@ -29,16 +23,10 @@ export const StartCliOptions: CLIOptionsDef<StartOptions> = {
 };
 
 export async function start(userOptions: StartOptions) {
-    const {
-        dir,
-        main,
-        _abortSignal: abortSignal,
-        _watchMode,
-        nodeOptions,
-    } = { ...StartRunOptions, ...userOptions };
+    const { dir, main, nodeOptions } = { ...StartRunOptions, ...userOptions };
     const pkgJson = loadConfig<PackageJSONMin>(dir, "package.json");
     const runFile = userOptions?.main || pkgJson.name || main;
-    const tsConfig = _watchMode ? userOptions._tsConfig : loadConfig<TSConfigMin>(dir, "tsconfig.json");
+    const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
     const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
 
     // TS Compile
@@ -51,14 +39,11 @@ export async function start(userOptions: StartOptions) {
         ],
         {
             cwd: dir,
-            signal: abortSignal,
         }
     );
 
     runProc.on("exit", (code) => {
-        if (code === null && _watchMode) {
-            console.log("🚀 Restarting...");
-        } else if (code !== 0) {
+        if (code !== 0) {
             errorLog(`Process exited with code ${code}.`);
         } else {
             successLog("Process completed successfully.");
