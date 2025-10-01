@@ -1,5 +1,5 @@
 {
-    "name": "@dre44/nest-dev",
+    "name": "@dre44/tsdev",
     "version": "0.3.0",
     "description": "",
     "type": "module",
@@ -26,9 +26,8 @@
         "@types/node": "^22.14.1"
     },
     "dependencies": {
+        "chokidar": "^4.0.3",
         "commander": "^14.0.0",
-        "concurrently": "^9.2.1",
-        "nodemon": "^3.1.10",
         "tsc-alias": "^1.8.16"
     }
 }

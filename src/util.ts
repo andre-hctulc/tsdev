@@ -17,15 +17,19 @@ export function loadConfig<T>(...path: string[]): T {
 /**
  * @returns The exit code
  */
-export function promisifyProcess(proc: ChildProcess): Promise<number | null> {
-    return new Promise((resolve) => {
-        proc.on("exit", (code) => {
-            resolve(code);
+export async function promisifyProcess(proc: ChildProcess): Promise<number | null> {
+    try {
+        return await new Promise((resolve) => {
+            proc.on("exit", (code) => {
+                resolve(code);
+            });
+            proc.on("error", (err) => {
+                resolve(null);
+            });
         });
-        proc.on("error", (err) => {
-            resolve(null);
-        });
-    });
+    } catch (err) {
+        return null;
+    }
 }
 
 export function addOptions<T extends object>(cmd: Command, obj: T, def: CLIOptionsDef<T>) {
@@ -80,7 +84,7 @@ export function successLog(message: string) {
 
 export function proc(command: string, args: string[] = [], options: SpawnOptions): ChildProcess {
     console.log(`> ${command} ${args.join(" ")}`);
-    const child = spawn(command, args, { ...options, stdio: "inherit" });
+    const child = spawn(command, args, { stdio: "inherit", ...options });
 
     let sigint: NodeJS.SignalsListener;
     let exit: NodeJS.SignalsListener;

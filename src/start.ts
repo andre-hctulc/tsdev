@@ -7,7 +7,7 @@ export interface StartOptions {
     nodeOptions?: string[];
 }
 
-export const StartRunOptions: Required<StartOptions> = {
+export const DefaultStartOptions: Required<StartOptions> = {
     dir: process.cwd(),
     main: "dist/main.js",
     nodeOptions: [],
@@ -23,7 +23,7 @@ export const StartCliOptions: CLIOptionsDef<StartOptions> = {
 };
 
 export async function start(userOptions: StartOptions) {
-    const { dir, main, nodeOptions } = { ...StartRunOptions, ...userOptions };
+    const { dir, main, nodeOptions } = { ...DefaultStartOptions, ...userOptions };
     const pkgJson = loadConfig<PackageJSONMin>(dir, "package.json");
     const runFile = userOptions?.main || pkgJson.name || main;
 

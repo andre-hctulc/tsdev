@@ -1,4 +1,4 @@
-# nest-dev
+# tsdev
 
 ## Features
 
@@ -11,19 +11,19 @@
 Build the app.
 
 ```bash
-npx @dre44/nest-dev build
+npx @dre44/tsdev build
 ```
 
 Start the app.
 
 ```bash
-npx @dre44/nest-dev start
+npx @dre44/tsdev start
 ```
 
 Start the app and restart on changes.
 
 ```bash
-npx @dre44/nest-dev dev
+npx @dre44/tsdev dev
 ```
 
 ## Pass TS or Node options
@@ -33,13 +33,13 @@ Use existing options but replace `--` with `++`.
 TypeScript options
 
 ```bash
-npx @dre44/nest-dev start --tsc ++sourceMap false ++declaration false
+npx @dre44/tsdev start --tsc ++sourceMap false ++declaration false
 ```
 
 Node options
 
 ```bash
-npx @dre44/nest-dev dev -n ++inspect
+npx @dre44/tsdev dev -n ++inspect
 ```
 
 ## Help
@@ -47,7 +47,7 @@ npx @dre44/nest-dev dev -n ++inspect
 Use
 
 ```bash
-npx  @dre44/nest-dev [command] --help
+npx  @dre44/tsdev [command] --help
 ```
 
 for more options or general command information.
@@ -65,7 +65,7 @@ _launch.json_
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["@dre44/nest-dev", "dev"],
+            "runtimeArgs": ["@dre44/tsdev", "dev"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         }
