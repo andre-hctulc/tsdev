@@ -87,8 +87,6 @@ export async function dev(userOptions: DevOptions) {
                 .then((result) => {
                     if (result === 0) {
                         successLog("Run process finished...");
-                    } else {
-                        errorLog("Failed to start run process. Waiting for changes...");
                     }
                 });
 
