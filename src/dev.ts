@@ -1,50 +1,54 @@
-import { build, DefaultBuildOptions, type BuildOptions } from "./build.js";
-import { StartCliOptions, StartRunOptions, start, type StartOptions } from "./start.js";
-import type { CLIOptionsDef } from "./types.js";
-import { DefaultWatchOptions, watch, WatchCliOptions, type WatchOptions } from "./watch.js";
+import { DefaultBuildOptions, type BuildOptions } from "./build.js";
+import { StartCliOptions, StartRunOptions, type StartOptions } from "./start.js";
+import type { CLIOptionsDef, PackageJSONMin, TSConfigMin } from "./types.js";
+import { loadConfig, propagateOptions } from "./util.js";
+import concurrently from "concurrently";
 
-export interface DevOptions extends WatchOptions, StartOptions, BuildOptions {}
+export interface DevOptions extends StartOptions, BuildOptions {
+    nodemonOptions?: string[];
+}
 
 export const DefaultDevOptions: Required<DevOptions> = {
     ...DefaultBuildOptions,
-    ...DefaultWatchOptions,
     ...StartRunOptions,
     nodeOptions: ["--inspect"],
+    nodemonOptions: [],
 };
 
 export const DevCliOptions: CLIOptionsDef<DevOptions> = {
     ...StartCliOptions,
-    ...WatchCliOptions,
+    nodemonOptions: {
+        flags: "--nodemon-options [options...]",
+        description: "Nodemon options to pass to the process (e.g. --watch out)",
+    },
 };
 
 export async function dev(userOptions: DevOptions) {
-    const { nodeOptions, dir, watch: _watch } = { ...DefaultDevOptions, ...userOptions };
+    const { nodeOptions, dir, tscOptions, nodemonOptions, main } = { ...DefaultDevOptions, ...userOptions };
+    const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
+    const pkg = loadConfig<PackageJSONMin>(dir, "package.json");
+    const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
+    const mainFile = userOptions?.main || pkg.name || main;
 
-    let preAbortController: AbortController | null = null;
-    let started = false;
-    // always add --watch to tsc options
-    await build({ ...userOptions, tscOptions: ["--watch", ...(userOptions.tscOptions || [])] });
+    const tscArgs = ["--watch", "--incremental", ...propagateOptions(tscOptions)];
 
-    await watch({
-        ...userOptions,
-        onChange: (abortSignal) => {
-            if (!started) {
-                console.log("🚀 Starting...");
-            }
+    const nodeArgs = [...propagateOptions(nodeOptions), mainFile];
+    if (paths.length) {
+        nodeArgs.unshift("-r tsconfig-paths/register");
+    }
 
-            started = true;
-            preAbortController?.abort();
+    const nodemonArgs = [
+        "--delay 1.5",
+        ...propagateOptions(nodemonOptions),
+        `--exec "node ${nodeArgs.join(" ")}"`,
+    ];
 
-            const abortController = new AbortController();
-            if (abortSignal) {
-                abortSignal.addEventListener("abort", () => {
-                    abortController.abort();
-                });
-            }
-            preAbortController = abortController;
-
-            // restart
-            start({ nodeOptions, ...userOptions, _watchMode: true, _abortSignal: abortController.signal });
+    concurrently([
+        { name: "tsc", command: `npx -y tsc ${tscArgs.join(" ")}`, cwd: dir },
+        {
+            name: "run",
+            command: `npx -y nodemon ${nodemonArgs.join(" ")}`,
+            cwd: dir,
         },
-    });
+    ]);
 }

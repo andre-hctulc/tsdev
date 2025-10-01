@@ -7,9 +7,9 @@ export interface TSConfigMin {
         moduleResolution?: string;
         paths?: Record<string, string[]>;
         outDir?: string;
-        include?: string[];
-        exclude?: string[];
     };
+    include?: string[];
+    exclude?: string[];
 }
 
 export interface PackageJSONMin {

@@ -4,7 +4,6 @@ import { program } from "commander";
 import { addAction, addOptions } from "./util.js";
 import { build, BuildCliOptions, DefaultBuildOptions } from "./build.js";
 import { StartCliOptions, StartRunOptions, start } from "./start.js";
-import { DefaultWatchOptions, watch, WatchCliOptions } from "./watch.js";
 import { DefaultDevOptions, dev, DevCliOptions } from "./dev.js";
 
 const prog = program.name("nest-dev").version("0.0.1").description("A CLI tool for NestJS development");
@@ -20,14 +19,6 @@ addAction(buildCmd, DefaultBuildOptions, build);
 const runCmd = prog.command("start").description("Start the NestJS application");
 addOptions(runCmd, StartRunOptions, StartCliOptions);
 addAction(runCmd, StartRunOptions, start);
-
-// ## Watch Command
-
-// DISABLED: Watch does nothing useful on its own
-
-// const watchCmd = prog.command("watch").description("Watch and run the NestJS application");
-// addOptions(watchCmd, DefaultWatchOptions, WatchCliOptions);
-// addAction(watchCmd, DefaultWatchOptions, watch);
 
 // ## Dev Command
 

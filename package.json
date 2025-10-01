@@ -8,10 +8,10 @@
         "tc:watch": "tsc --noEmit --watch",
         "prebuild": "rm -rf dist",
         "build": "tsc",
-        "test:build": "tsx src/program.ts build --dir ../../apps/auth-server",
-        "test:start": "tsx src/program.ts start --dir ../../apps/auth-server",
-        "test:watch": "tsx src/program.ts watch --dir ../../apps/auth-server",
-        "test:dev": "tsx src/program.ts dev --dir ../../apps/auth-server"
+        "test:build": "tsx src/program.ts build --dir ../../projects/app0/apps/idp",
+        "test:start": "tsx src/program.ts start --dir ../../projects/app0/apps/idp",
+        "test:watch": "tsx src/program.ts watch --dir ../../projects/app0/apps/idp",
+        "test:dev": "tsx src/program.ts dev --dir ../../projects/app0/apps/idp"
     },
     "bin": "dist/program.js",
     "main": "./dist/index.js",
@@ -24,10 +24,12 @@
     "devDependencies": {
         "@dotenvx/dotenvx": "^1.44.2",
         "@types/node": "^22.14.1",
-        "tsc-alias": "^1.8.16"
+        "nodemon": "^3.1.10",
+        "tsc-alias": "^1.8.16",
+        "tsconfig-paths": "^3.11.0"
     },
     "dependencies": {
-        "chokidar": "^4.0.3",
-        "commander": "^14.0.0"
+        "commander": "^14.0.0",
+        "concurrently": "^9.2.1"
     }
 }

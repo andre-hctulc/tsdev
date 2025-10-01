@@ -1,6 +1,6 @@
 import { existsSync, statSync } from "fs";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
-import { promisifyProcess, loadConfig, errorExit, proc, errorLog, propagateOptions } from "./util.js";
+import { promisifyProcess, loadConfig, errorExit, proc, propagateOptions } from "./util.js";
 import { rm } from "fs/promises";
 
 export interface BuildOptions {
@@ -9,7 +9,6 @@ export interface BuildOptions {
     output?: string;
     tscAliasOptions?: string[];
     _abortSignal?: AbortSignal;
-    _watchMode?: boolean;
     clearDistDir?: boolean;
 }
 
@@ -18,7 +17,6 @@ export const DefaultBuildOptions: Required<BuildOptions> = {
     tscOptions: [],
     tscAliasOptions: [],
     _abortSignal: new AbortController().signal,
-    _watchMode: false,
     clearDistDir: false,
     output: "dist",
 };
@@ -49,7 +47,6 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
         tscAliasOptions,
         tscOptions,
         _abortSignal: abortSignal,
-        _watchMode,
         clearDistDir,
         output,
     } = {
@@ -57,7 +54,7 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
         ...userOptions,
     };
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
-    const paths = tsConfig.compilerOptions?.paths;
+    const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
     const outputDir = userOptions.output || tsConfig.compilerOptions?.outDir || DefaultBuildOptions.output;
 
     if (clearDistDir && existsSync(outputDir) && statSync(outputDir).isDirectory()) {
@@ -67,10 +64,7 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
 
     // TS Compile
     const opts = propagateOptions(tscOptions);
-    if (_watchMode) {
-        opts.unshift("--incremental");
-    }
-    const compileProc = proc("npx", ["--yes", "tsc", ...opts], { cwd: dir, signal: abortSignal });
+    const compileProc = proc("npx", ["-y", "tsc", ...opts], { cwd: dir, signal: abortSignal });
     const compiled = await promisifyProcess(compileProc);
 
     if (abortSignal?.aborted) {
@@ -78,17 +72,13 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
     }
 
     if (compiled !== 0) {
-        if (_watchMode) {
-            errorLog(`TypeScript compilation failed, waiting for changes...`);
-            return false;
-        } else {
-            errorExit(`TypeScript compilation failed with exit code ${compiled}.`);
-        }
+        errorExit(`TypeScript compilation failed with exit code ${compiled}.`);
     }
 
-    if (paths && Object.keys(paths).length > 0) {
+    // In watch mode we use tsconfig-paths at run level
+    if (paths.length) {
         // tsc-alias
-        const aliasProc = proc("npx", ["--yes", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
+        const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
             cwd: dir,
             signal: abortSignal,
         });
