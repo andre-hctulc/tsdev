@@ -48,7 +48,7 @@ export const WatchCliOptions: CLIOptionsDef<WatchOptions> = {
 const DEFAULT_EXCLUDE = ["**/node_modules/**"];
 
 export async function watch(userOptions: WatchOptions) {
-    const { exclude, watch, delay, onChange, dir, preventInitialBuild } = {
+    const { exclude, delay, onChange, dir, preventInitialBuild } = {
         ...DefaultWatchOptions,
         ...userOptions,
     };

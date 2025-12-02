@@ -5,7 +5,6 @@ import { errorLog, loadConfig, proc, promisifyProcess, propagateOptions, success
 import { DefaultWatchOptions, watch, type WatchOptions } from "./watch.js";
 
 export interface DevOptions extends StartOptions, BuildOptions, WatchOptions {
-    nodemonOptions?: string[];
 }
 
 export const DefaultDevOptions: Required<DevOptions> = {
@@ -13,19 +12,14 @@ export const DefaultDevOptions: Required<DevOptions> = {
     ...DefaultStartOptions,
     ...DefaultWatchOptions,
     nodeOptions: [],
-    nodemonOptions: [],
 };
 
 export const DevCliOptions: CLIOptionsDef<DevOptions> = {
     ...StartCliOptions,
-    nodemonOptions: {
-        flags: "--nodemon-options [options...]",
-        description: "Nodemon options to pass to the process (e.g. --watch out)",
-    },
 };
 
 export async function dev(userOptions: DevOptions) {
-    const { nodeOptions, dir, tscOptions, nodemonOptions, main, tscAliasOptions } = {
+    const { nodeOptions, dir, tscOptions, tscAliasOptions } = {
         ...DefaultDevOptions,
         ...userOptions,
     };
@@ -35,9 +29,6 @@ export async function dev(userOptions: DevOptions) {
 
     const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
     const mainFile = userOptions.main || pkg.name || DefaultStartOptions.main;
-    const srcDir = userOptions.watch || tsConfig.include || DefaultDevOptions.watch;
-    const srcDirs = Array.isArray(srcDir) ? srcDir : [srcDir];
-    const outDir = userOptions.output || tsConfig.compilerOptions?.outDir || DefaultBuildOptions.output;
 
     const tscArgs = ["--watch", "--incremental", ...propagateOptions(tscOptions)];
 
