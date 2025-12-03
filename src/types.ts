@@ -1,5 +1,12 @@
 import type { Option } from "commander";
 
+export type DefaultOptions = Record<string, any>;
+
+export interface TSDevConfig {
+    profiles?: Record<string, DefaultOptions>;
+    options?: DefaultOptions;
+}
+
 export interface TSConfigMin {
     compilerOptions?: {
         module?: string;
@@ -16,6 +23,7 @@ export interface PackageJSONMin {
     name?: string;
     version?: string;
     main?: string;
+    tsdev?: TSDevConfig;
 }
 
 export interface CLIOption {

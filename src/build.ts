@@ -2,8 +2,9 @@ import { existsSync, statSync } from "fs";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
 import { promisifyProcess, loadConfig, errorExit, proc, propagateOptions } from "./util.js";
 import { rm } from "fs/promises";
+import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
 
-export interface BuildOptions {
+export interface BuildOptions extends BaseOptions {
     dir?: string;
     tscOptions?: string[];
     output?: string;
@@ -13,6 +14,7 @@ export interface BuildOptions {
 }
 
 export const DefaultBuildOptions: Required<BuildOptions> = {
+    ...DefaultBaseOptions,
     dir: process.cwd(),
     tscOptions: [],
     tscAliasOptions: [],
@@ -22,6 +24,7 @@ export const DefaultBuildOptions: Required<BuildOptions> = {
 };
 
 export const BuildCliOptions: CLIOptionsDef<BuildOptions> = {
+    ...BaseCliOptions,
     dir: {
         flags: "-d, --dir [path]",
         description: "Directory to run the build in (default: current working directory).",

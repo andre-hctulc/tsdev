@@ -1,26 +1,35 @@
-import { DefaultBuildOptions, type BuildOptions } from "./build.js";
+import { BuildCliOptions, DefaultBuildOptions, type BuildOptions } from "./build.js";
 import { StartCliOptions, DefaultStartOptions, type StartOptions } from "./start.js";
 import type { CLIOptionsDef, PackageJSONMin, TSConfigMin } from "./types.js";
-import { errorLog, loadConfig, proc, promisifyProcess, propagateOptions, successLog } from "./util.js";
-import { DefaultWatchOptions, watch, type WatchOptions } from "./watch.js";
+import {
+    errorLog,
+    getDefaultOptions,
+    loadConfig,
+    proc,
+    promisifyProcess,
+    propagateOptions,
+    successLog,
+} from "./util.js";
+import { DefaultWatchOptions, watch, WatchCliOptions, type WatchOptions } from "./watch.js";
 
-export interface DevOptions extends StartOptions, BuildOptions, WatchOptions {
-}
+export interface DevOptions extends BuildOptions, StartOptions, WatchOptions {}
 
 export const DefaultDevOptions: Required<DevOptions> = {
     ...DefaultBuildOptions,
     ...DefaultStartOptions,
     ...DefaultWatchOptions,
-    nodeOptions: [],
 };
 
 export const DevCliOptions: CLIOptionsDef<DevOptions> = {
+    ...BuildCliOptions,
     ...StartCliOptions,
+    ...WatchCliOptions,
 };
 
 export async function dev(userOptions: DevOptions) {
     const { nodeOptions, dir, tscOptions, tscAliasOptions } = {
         ...DefaultDevOptions,
+        ...getDefaultOptions(userOptions.profile),
         ...userOptions,
     };
 

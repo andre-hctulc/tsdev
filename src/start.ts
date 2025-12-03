@@ -1,19 +1,22 @@
 import type { CLIOptionsDef, PackageJSONMin } from "./types.js";
-import { loadConfig, proc, errorLog, successLog, propagateOptions } from "./util.js";
+import { loadConfig, proc, errorLog, successLog, propagateOptions, getDefaultOptions } from "./util.js";
+import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
 
-export interface StartOptions {
+export interface StartOptions extends BaseOptions {
     dir?: string;
     main?: string;
     nodeOptions?: string[];
 }
 
 export const DefaultStartOptions: Required<StartOptions> = {
+    ...DefaultBaseOptions,
     dir: process.cwd(),
     main: "dist/main.js",
     nodeOptions: [],
 };
 
 export const StartCliOptions: CLIOptionsDef<StartOptions> = {
+    ...BaseCliOptions,
     dir: { flags: "-d, --dir [path]", description: "Nest app directory" },
     main: { flags: "-m, --main [path]", description: "Main file to run (default: dist/main.js)" },
     nodeOptions: {
@@ -23,7 +26,11 @@ export const StartCliOptions: CLIOptionsDef<StartOptions> = {
 };
 
 export async function start(userOptions: StartOptions) {
-    const { dir, main, nodeOptions } = { ...DefaultStartOptions, ...userOptions };
+    const { dir, main, nodeOptions } = {
+        ...DefaultStartOptions,
+        ...getDefaultOptions(userOptions.profile),
+        ...userOptions,
+    };
     const pkgJson = loadConfig<PackageJSONMin>(dir, "package.json");
     const runFile = userOptions?.main || pkgJson.name || main;
 

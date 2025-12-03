@@ -1,10 +1,10 @@
 import chokidar from "chokidar";
-import { BuildCliOptions } from "./build.js";
-import { isAbsolute, join, resolve } from "path";
+import { isAbsolute, resolve } from "path";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
 import { loadConfig } from "./util.js";
+import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
 
-export interface WatchOptions {
+export interface WatchOptions extends BaseOptions {
     dir?: string;
     watch?: string | string[];
     exclude?: string | string[];
@@ -20,6 +20,7 @@ export interface WatchOptions {
 }
 
 export const DefaultWatchOptions: Required<WatchOptions> = {
+    ...DefaultBaseOptions,
     dir: process.cwd(),
     watch: "src",
     delay: 1500,
@@ -29,7 +30,7 @@ export const DefaultWatchOptions: Required<WatchOptions> = {
 };
 
 export const WatchCliOptions: CLIOptionsDef<WatchOptions> = {
-    ...BuildCliOptions,
+    ...BaseCliOptions,
     watch: { flags: "-w, --watch", description: "Files or directories to watch for changes." },
     delay: {
         flags: "--delay [ms]",

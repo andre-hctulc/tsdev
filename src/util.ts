@@ -1,7 +1,7 @@
 import { ChildProcess, spawn, type SpawnOptions } from "child_process";
 import { readFileSync } from "fs";
 import { join } from "path";
-import type { CLIOptionsDef } from "./types.js";
+import type { CLIOptionsDef, PackageJSONMin } from "./types.js";
 import type { Command, Option } from "commander";
 
 export function loadConfig<T>(...path: string[]): T {
@@ -32,10 +32,10 @@ export async function promisifyProcess(proc: ChildProcess): Promise<number | nul
     }
 }
 
-export function addOptions<T extends object>(cmd: Command, obj: T, def: CLIOptionsDef<T>) {
+export function addOptions<T extends object>(cmd: Command, defaultValues: T, def: CLIOptionsDef<T>) {
     Object.entries(def).forEach(([key, option]) => {
         let o: Option = option as Option;
-        const defaultValue = obj[key as keyof T] as any;
+        const defaultValue = defaultValues[key as keyof T] as any;
 
         if (!o?.flags || defaultValue === undefined) {
             return;
@@ -159,4 +159,15 @@ export function propagateOptions(options: string[]): string[] {
         }
         return o;
     });
+}
+
+export function getDefaultOptions(profile: string | undefined): Record<string, any> {
+    const pkg = loadConfig<PackageJSONMin>(process.cwd(), "package.json");
+    const conf =
+        !profile || profile === "default" || profile === ""
+            ? pkg.tsdev?.options
+            : typeof profile === "string"
+            ? pkg.tsdev?.profiles?.[profile]
+            : undefined;
+    return conf || {};
 }
