@@ -11,7 +11,8 @@ export interface StartOptions extends BaseOptions {
 export const DefaultStartOptions: Required<StartOptions> = {
     ...DefaultBaseOptions,
     dir: process.cwd(),
-    main: "dist/main.js",
+    // default is package.json main, so this **must be empty**
+    main: "",
     nodeOptions: [],
 };
 
@@ -32,7 +33,7 @@ export async function start(userOptions: StartOptions) {
         ...userOptions,
     };
     const pkgJson = loadConfig<PackageJSONMin>(dir, "package.json");
-    const runFile = userOptions?.main || pkgJson.name || main;
+    const runFile = main || pkgJson.main || "dist/main.js";
 
     // TS Compile
     const runProc = proc("node", [...propagateOptions(nodeOptions), runFile], {

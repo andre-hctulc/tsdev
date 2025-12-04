@@ -168,26 +168,17 @@ export function getDefaultOptions(profile: string | undefined): Record<string, a
         profile = "default";
     }
 
-    const conf =
-        profile === "default"
-            ? pkg.tsdev?.config || pkg.tsdev?.profiles?.[profile]
-            : typeof profile === "string"
-            ? pkg.tsdev?.profiles?.[profile]
-            : undefined;
-
-    if (conf !== undefined && typeof conf !== "object") {
-        const allowedConfigPaths: string[] = [`profiles.${profile}`];
-
-        if (profile === "default") {
-            allowedConfigPaths.push("config");
+    const checkConf = (conf: unknown) => {
+        if (conf !== undefined && typeof conf !== "object") {
+            errorExit("Invalid tsdev configuration. Expected an object.");
         }
+    };
 
-        errorExit(
-            `Invalid tsdev profile configuration for profile <${profile}>. Expected config at ${allowedConfigPaths
-                .map((p) => `"${p}"`)
-                .join(" or ")}.`
-        );
-    }
+    const baseConf = pkg.tsdev?.config || {};
+    checkConf(baseConf);
 
-    return conf || {};
+    const profileConf = pkg.tsdev?.profiles?.[profile];
+    checkConf(profileConf);
+
+    return { ...baseConf, ...profileConf };
 }

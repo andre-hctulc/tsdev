@@ -27,7 +27,7 @@ export const DevCliOptions: CLIOptionsDef<DevOptions> = {
 };
 
 export async function dev(userOptions: DevOptions) {
-    const { nodeOptions, dir, tscOptions, tscAliasOptions } = {
+    const { nodeOptions, dir, tscOptions, tscAliasOptions, main } = {
         ...DefaultDevOptions,
         ...getDefaultOptions(userOptions.profile),
         ...userOptions,
@@ -37,7 +37,7 @@ export async function dev(userOptions: DevOptions) {
     const pkg = loadConfig<PackageJSONMin>(dir, "package.json");
 
     const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
-    const mainFile = userOptions.main || pkg.name || DefaultStartOptions.main;
+    const mainFile = main || pkg.main || "dist/main.js";
 
     const tscArgs = ["--watch", "--incremental", ...propagateOptions(tscOptions)];
 

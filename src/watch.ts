@@ -22,7 +22,8 @@ export interface WatchOptions extends BaseOptions {
 export const DefaultWatchOptions: Required<WatchOptions> = {
     ...DefaultBaseOptions,
     dir: process.cwd(),
-    watch: "src",
+    // default is tsconfig outDir, so this **must be empty**
+    watch: "",
     delay: 1500,
     exclude: [],
     preventInitialBuild: false,
@@ -49,14 +50,14 @@ export const WatchCliOptions: CLIOptionsDef<WatchOptions> = {
 const DEFAULT_EXCLUDE = ["**/node_modules/**"];
 
 export async function watch(userOptions: WatchOptions) {
-    const { exclude, delay, onChange, dir, preventInitialBuild } = {
+    const { exclude, delay, onChange, dir, preventInitialBuild, watch } = {
         ...DefaultWatchOptions,
         ...userOptions,
     };
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
     const ignoredPatterns = [...DEFAULT_EXCLUDE, ...(exclude || [])];
 
-    const inp = userOptions.watch || tsConfig.compilerOptions?.outDir || "src";
+    const inp = watch || tsConfig.compilerOptions?.outDir || "dist";
     const inpArray = Array.isArray(inp) ? inp : [inp];
     const watchPatterns = inpArray.map((w) => (isAbsolute(w) ? w : resolve(dir, w)));
     const watcher = chokidar.watch(watchPatterns, {

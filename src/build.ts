@@ -20,7 +20,8 @@ export const DefaultBuildOptions: Required<BuildOptions> = {
     tscAliasOptions: [],
     _abortSignal: new AbortController().signal,
     clearDistDir: false,
-    output: "dist",
+    // default is tsconfig outDir, so this **must be empty**
+    output: "",
 };
 
 export const BuildCliOptions: CLIOptionsDef<BuildOptions> = {
@@ -58,11 +59,11 @@ export async function build(userOptions: BuildOptions): Promise<boolean> {
     };
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
     const paths = Object.keys(tsConfig.compilerOptions?.paths || {});
-    const outputDir = userOptions.output || tsConfig.compilerOptions?.outDir || DefaultBuildOptions.output;
+    const outputDir = output || tsConfig.compilerOptions?.outDir || "dist";
 
     if (clearDistDir && existsSync(outputDir) && statSync(outputDir).isDirectory()) {
         // Clear the dist directory
-        await rm(output, { recursive: true, force: true });
+        await rm(outputDir, { recursive: true, force: true });
     }
 
     // TS Compile
