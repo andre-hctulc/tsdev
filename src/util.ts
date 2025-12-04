@@ -163,11 +163,31 @@ export function propagateOptions(options: string[]): string[] {
 
 export function getDefaultOptions(profile: string | undefined): Record<string, any> {
     const pkg = loadConfig<PackageJSONMin>(process.cwd(), "package.json");
+
+    if (!profile) {
+        profile = "default";
+    }
+
     const conf =
-        !profile || profile === "default" || profile === ""
-            ? pkg.tsdev?.options
+        profile === "default"
+            ? pkg.tsdev?.config || pkg.tsdev?.profiles?.[profile]
             : typeof profile === "string"
             ? pkg.tsdev?.profiles?.[profile]
             : undefined;
+
+    if (conf !== undefined && typeof conf !== "object") {
+        const allowedConfigPaths: string[] = [`profiles.${profile}`];
+
+        if (profile === "default") {
+            allowedConfigPaths.push("config");
+        }
+
+        errorExit(
+            `Invalid tsdev profile configuration for profile <${profile}>. Expected config at ${allowedConfigPaths
+                .map((p) => `"${p}"`)
+                .join(" or ")}.`
+        );
+    }
+
     return conf || {};
 }

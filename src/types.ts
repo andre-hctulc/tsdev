@@ -4,7 +4,7 @@ export type DefaultOptions = Record<string, any>;
 
 export interface TSDevConfig {
     profiles?: Record<string, DefaultOptions>;
-    options?: DefaultOptions;
+    config?: DefaultOptions;
 }
 
 export interface TSConfigMin {
