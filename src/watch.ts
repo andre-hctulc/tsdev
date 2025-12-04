@@ -16,7 +16,6 @@ export interface WatchOptions extends BaseOptions {
      * Prevent initial build on start.
      */
     preventInitialBuild?: boolean;
-    onChange?: (abortSignal: AbortSignal, initial: boolean) => void;
 }
 
 export const DefaultWatchOptions: Required<WatchOptions> = {
@@ -27,7 +26,6 @@ export const DefaultWatchOptions: Required<WatchOptions> = {
     delay: 1500,
     exclude: [],
     preventInitialBuild: false,
-    onChange: () => {},
 };
 
 export const WatchCliOptions: CLIOptionsDef<WatchOptions> = {
@@ -49,8 +47,11 @@ export const WatchCliOptions: CLIOptionsDef<WatchOptions> = {
 
 const DEFAULT_EXCLUDE = ["**/node_modules/**"];
 
-export async function watch(userOptions: WatchOptions) {
-    const { exclude, delay, onChange, dir, preventInitialBuild, watch } = {
+export async function watch(
+    userOptions: WatchOptions,
+    onChange: (abortSignal: AbortSignal, initial: boolean) => void
+) {
+    const { exclude, delay, dir, preventInitialBuild, watch } = {
         ...DefaultWatchOptions,
         ...userOptions,
     };

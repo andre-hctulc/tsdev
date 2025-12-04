@@ -49,48 +49,45 @@ export async function dev(userOptions: DevOptions) {
     console.log("🛠  Building in watch mode...");
     proc("npx", ["-y", "tsc", ...tscArgs], { cwd: dir, stdio: "ignore" });
 
-    watch({
-        ...userOptions,
-        onChange: async () => {
-            currentAbortController?.abort();
-            const abortController = new AbortController();
-            currentAbortController = abortController;
+    watch(userOptions, async () => {
+        currentAbortController?.abort();
+        const abortController = new AbortController();
+        currentAbortController = abortController;
 
-            if (paths.length) {
-                console.log("🛠  Updating paths...");
-                const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
-                    cwd: dir,
-                    signal: abortController.signal,
-                    stdio: "ignore",
-                });
-
-                const aliasResult = await promisifyProcess(aliasProc).catch(() => {
-                    errorLog("Path aliasing failed. Waiting for changes...");
-                });
-
-                if (aliasResult !== 0) {
-                    return;
-                }
-            }
-
-            console.log(started ? "🚀 Restarting..." : "🚀 Starting...");
-
-            const runProc = proc("node", [...nodeArgs, mainFile], {
+        if (paths.length) {
+            console.log("🛠  Updating paths...");
+            const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
                 cwd: dir,
                 signal: abortController.signal,
+                stdio: "ignore",
             });
 
-            promisifyProcess(runProc)
-                .catch((err) => {
-                    errorLog("Run process failed. Waiting for changes...");
-                })
-                .then((result) => {
-                    if (result === 0) {
-                        successLog("Run process finished...");
-                    }
-                });
+            const aliasResult = await promisifyProcess(aliasProc).catch(() => {
+                errorLog("Path aliasing failed. Waiting for changes...");
+            });
 
-            started = true;
-        },
+            if (aliasResult !== 0) {
+                return;
+            }
+        }
+
+        console.log(started ? "🚀 Restarting..." : "🚀 Starting...");
+
+        const runProc = proc("node", [...nodeArgs, mainFile], {
+            cwd: dir,
+            signal: abortController.signal,
+        });
+
+        promisifyProcess(runProc)
+            .catch((err) => {
+                errorLog("Run process failed. Waiting for changes...");
+            })
+            .then((result) => {
+                if (result === 0) {
+                    successLog("Run process finished...");
+                }
+            });
+
+        started = true;
     });
 }

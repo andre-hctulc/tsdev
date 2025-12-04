@@ -1,5 +1,7 @@
 # tsdev
 
+TypeScript dev cli.
+
 ## Features
 
 -   Full ES Next support

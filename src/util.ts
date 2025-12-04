@@ -177,8 +177,16 @@ export function getDefaultOptions(profile: string | undefined): Record<string, a
     const baseConf = pkg.tsdev?.config;
     checkConf(baseConf);
 
+    if (baseConf) {
+        console.log("⚙ Using base configuration");
+    }
+
     const profileConf = pkg.tsdev?.profiles?.[profile];
     checkConf(profileConf);
+
+    if (profileConf) {
+        console.log(`👤 Using profile "${profile}"`);
+    }
 
     return { ...baseConf, ...profileConf };
 }
