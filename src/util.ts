@@ -174,7 +174,7 @@ export function getDefaultOptions(profile: string | undefined): Record<string, a
         }
     };
 
-    const baseConf = pkg.tsdev?.config || {};
+    const baseConf = pkg.tsdev?.config;
     checkConf(baseConf);
 
     const profileConf = pkg.tsdev?.profiles?.[profile];
