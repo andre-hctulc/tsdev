@@ -3,6 +3,7 @@ import { isAbsolute, resolve } from "path";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
 import { loadConfig } from "./util.js";
 import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
+import { glob } from "fs/promises";
 
 export interface WatchOptions extends BaseOptions {
     dir?: string;
@@ -49,7 +50,7 @@ const DEFAULT_EXCLUDE = ["**/node_modules/**"];
 
 export async function watch(
     userOptions: WatchOptions,
-    onChange: (abortSignal: AbortSignal, initial: boolean) => void
+    onChange: (abortSignal: AbortSignal, initial: boolean) => void,
 ) {
     const { exclude, delay, dir, preventInitialBuild, watch } = {
         ...DefaultWatchOptions,
@@ -58,9 +59,19 @@ export async function watch(
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
     const ignoredPatterns = [...DEFAULT_EXCLUDE, ...(exclude || [])];
 
-    const inp = watch || tsConfig.compilerOptions?.outDir || "dist";
-    const inpArray = Array.isArray(inp) ? inp : [inp];
-    const watchPatterns = inpArray.map((w) => (isAbsolute(w) ? w : resolve(dir, w)));
+    let watchPatterns: string[] = [];
+
+    if (watch) {
+        watchPatterns = Array.isArray(watch) ? watch : [watch];
+    } else {
+        if (tsConfig.compilerOptions?.outDir) {
+            watchPatterns.push(tsConfig.compilerOptions.outDir);
+        }
+        watchPatterns.push(".env", ".env.local", ".env.development", ".env.development.local");
+    }
+
+    watchPatterns = watchPatterns.map((w) => (isAbsolute(w) ? w : resolve(dir, w)));
+
     const watcher = chokidar.watch(watchPatterns, {
         ignored: ignoredPatterns,
         persistent: true,
@@ -91,7 +102,7 @@ export async function watch(
                 () => {
                     triggerChange(abortController.signal, !!initial);
                 },
-                initial ? 0 : delay
+                initial ? 0 : delay,
             ),
             abortController,
         };
