@@ -66,6 +66,8 @@ export async function watch(
     } else {
         if (tsConfig.compilerOptions?.outDir) {
             watchPatterns.push(tsConfig.compilerOptions.outDir);
+        } else {
+            watchPatterns.push("dist");
         }
         watchPatterns.push(".env", ".env.local", ".env.development", ".env.development.local");
     }
