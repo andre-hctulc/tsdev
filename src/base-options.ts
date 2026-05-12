@@ -19,5 +19,6 @@ export const BaseCliOptions: CLIOptionsDef<BaseOptions> = {
     logLevel: {
         flags: "--log-level [level]",
         description: "Logging level (error, warn, info, debug). Default is 'info'.",
+        defaultValue: "info",
     },
 };
