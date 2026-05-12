@@ -8,10 +8,10 @@
         "tc:watch": "tsc --noEmit --watch",
         "prebuild": "rm -rf dist",
         "build": "tsc",
-        "test:build": "tsx src/program.ts build -l debug --dir ../../projects/mxidp/apps/backend",
-        "test:start": "tsx src/program.ts start -l debug --dir ../../projects/mxidp/apps/backend",
-        "test:watch": "tsx src/program.ts watch -l debug --dir ../../projects/mxidp/apps/backend",
-        "test:dev": "tsx src/program.ts dev -l debug --dir ../../projects/mxidp/apps/backend"
+        "test:build": "tsx src/program.ts build -l debug --dir ${APP_DIR}",
+        "test:start": "tsx src/program.ts start -l debug --dir ${APP_DIR}",
+        "test:watch": "tsx src/program.ts watch -l debug --dir ${APP_DIR}",
+        "test:dev": "tsx src/program.ts dev -l debug --dir ${APP_DIR}"
     },
     "bin": "dist/program.js",
     "main": "./dist/index.js",
