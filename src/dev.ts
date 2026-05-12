@@ -56,7 +56,7 @@ export async function dev(userOptions: DevOptions) {
         currentAbortController = abortController;
 
         if (paths.length) {
-            logInfo("🛠  Updating paths...");
+            logInfo("Updating paths...");
             const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
                 cwd: dir,
                 signal: abortController.signal,
@@ -72,7 +72,7 @@ export async function dev(userOptions: DevOptions) {
             }
         }
 
-        logInfo(started ? "🚀 Restarting..." : "🚀 Starting...");
+        logInfo(started ? "Restarting..." : "Starting...");
 
         const runProc = proc("node", [...nodeArgs, mainFile], {
             cwd: dir,

@@ -14,6 +14,7 @@ export interface TSConfigMin {
         moduleResolution?: string;
         paths?: Record<string, string[]>;
         outDir?: string;
+        rootDir?: string;
     };
     include?: string[];
     exclude?: string[];

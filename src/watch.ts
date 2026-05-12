@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
-import { isAbsolute, resolve } from "path";
+import { isAbsolute, join, resolve } from "path";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
-import { loadConfig, logDebug, logInfo } from "./util.js";
+import { loadConfig, logDebug, logInfo, relPath } from "./util.js";
 import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
 
 export interface WatchOptions extends BaseOptions {
@@ -56,25 +56,34 @@ export async function watch(
         ...userOptions,
     };
     const tsConfig = loadConfig<TSConfigMin>(dir, "tsconfig.json");
+
     const ignoredPatterns = [...DEFAULT_EXCLUDE, ...(exclude || [])];
+    if (tsConfig.exclude) {
+        ignoredPatterns.push(...tsConfig.exclude);
+    }
+    if (tsConfig.compilerOptions?.outDir) {
+        ignoredPatterns.push(tsConfig.compilerOptions.outDir);
+    }
 
     let watchPatterns: string[] = [];
-
     if (watch) {
         watchPatterns = Array.isArray(watch) ? watch : [watch];
     } else {
-        if (tsConfig.compilerOptions?.outDir) {
-            watchPatterns.push(tsConfig.compilerOptions.outDir);
-        } else {
-            watchPatterns.push("dist");
-        }
         watchPatterns.push(".env", ".env.*");
+        if (tsConfig.compilerOptions?.rootDir) {
+            watchPatterns.push(tsConfig.compilerOptions.rootDir);
+        } else if (tsConfig.include?.length) {
+            watchPatterns.push(...tsConfig.include);
+        } else {
+            // TODO improve?
+            watchPatterns.push("**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx");
+        }
     }
 
     watchPatterns = watchPatterns.map((w) => (isAbsolute(w) ? w : resolve(dir, w)));
 
-    logDebug("Watch patterns:", watchPatterns.join(", "));
-    logDebug("Ignore patterns:", ignoredPatterns.join(", "));
+    logDebug("Watch patterns:", watchPatterns.map(relPath).join(", "));
+    logDebug("Ignore patterns:", ignoredPatterns.map(relPath).join(", "));
 
     const watcher = chokidar.watch(watchPatterns, {
         ignored: ignoredPatterns,
@@ -114,15 +123,15 @@ export async function watch(
 
     watcher
         .on("add", (path) => {
-            logDebug(`Changes: File added: ${path}`);
+            logDebug(`<Changes> File added: ${path}`);
             debounceChange();
         })
         .on("change", (path) => {
-            logDebug(`Changes: File changed: ${path}`);
+            logDebug(`<Changes> File changed: ${path}`);
             debounceChange();
         })
         .on("unlink", (path) => {
-            logDebug(`Changes: File removed: ${path}`);
+            logDebug(`<Changes> File removed: ${path}`);
             debounceChange();
         });
 

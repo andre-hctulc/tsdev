@@ -1,6 +1,6 @@
 import { ChildProcess, spawn, type SpawnOptions } from "child_process";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, relative } from "path";
 import type { CLIOptionsDef, PackageJSONMin } from "./types.js";
 import type { Command, Option } from "commander";
 
@@ -214,7 +214,7 @@ function baseLog(messageLevel: LogLevel, emoji: string, ...message: string[]) {
 }
 
 export function logInfo(...message: string[]) {
-    baseLog("info", "ℹ️", ...message);
+    baseLog("info", "ℹ️ ", ...message);
 }
 
 export function logDebug(...message: string[]) {
@@ -227,4 +227,8 @@ export function logWarn(...message: string[]) {
 
 export function logError(...message: string[]) {
     baseLog("error", "🔴", ...message);
+}
+
+export function relPath(path: string) {
+    return relative(process.cwd(), path);
 }
