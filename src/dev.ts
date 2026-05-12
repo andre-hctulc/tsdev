@@ -5,6 +5,7 @@ import {
     errorLog,
     getDefaultOptions,
     loadConfig,
+    logInfo,
     proc,
     promisifyProcess,
     propagateOptions,
@@ -46,7 +47,7 @@ export async function dev(userOptions: DevOptions) {
     let currentAbortController: AbortController | null = null;
     let started = false;
 
-    console.log("🛠  Building in watch mode...");
+    logInfo("Building in watch mode...");
     proc("npx", ["-y", "tsc", ...tscArgs], { cwd: dir, stdio: "ignore" });
 
     watch(userOptions, async () => {
@@ -55,7 +56,7 @@ export async function dev(userOptions: DevOptions) {
         currentAbortController = abortController;
 
         if (paths.length) {
-            console.log("🛠  Updating paths...");
+            logInfo("🛠  Updating paths...");
             const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
                 cwd: dir,
                 signal: abortController.signal,
@@ -71,7 +72,7 @@ export async function dev(userOptions: DevOptions) {
             }
         }
 
-        console.log(started ? "🚀 Restarting..." : "🚀 Starting...");
+        logInfo(started ? "🚀 Restarting..." : "🚀 Starting...");
 
         const runProc = proc("node", [...nodeArgs, mainFile], {
             cwd: dir,

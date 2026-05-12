@@ -43,7 +43,7 @@ export function addOptions<T extends object>(cmd: Command, defaultValues: T, def
         cmd.option(
             o.flags,
             o.description,
-            typeof defaultValue === "number" ? String(defaultValue) : defaultValue
+            typeof defaultValue === "number" ? String(defaultValue) : defaultValue,
         );
     });
 }
@@ -83,7 +83,7 @@ export function successLog(message: string) {
 }
 
 export function proc(command: string, args: string[] = [], options: SpawnOptions): ChildProcess {
-    console.log(`> ${command} ${args.join(" ")}`);
+    logInfo(`> ${command} ${args.join(" ")}`);
     const child = spawn(command, args, { stdio: "inherit", ...options });
 
     let sigint: NodeJS.SignalsListener;
@@ -94,7 +94,7 @@ export function proc(command: string, args: string[] = [], options: SpawnOptions
         "exit",
         (exit = () => {
             cleanup();
-        })
+        }),
     );
 
     process.on(
@@ -102,14 +102,14 @@ export function proc(command: string, args: string[] = [], options: SpawnOptions
         (sigint = () => {
             cleanup();
             process.exit(0);
-        })
+        }),
     );
     process.on(
         "SIGTERM",
         (sigterm = () => {
             cleanup();
             process.exit(0);
-        })
+        }),
     );
 
     child.on("exit", () => {
@@ -136,7 +136,7 @@ export function proc(command: string, args: string[] = [], options: SpawnOptions
 export function addAction<T extends object>(
     cmd: Command,
     defaultOptions: T,
-    action: (options: T) => unknown
+    action: (options: T) => unknown,
 ) {
     cmd.action(async (options, command) => {
         if ((command?.args?.length ?? 0) > 0) {
@@ -178,15 +178,47 @@ export function getDefaultOptions(profile: string | undefined): Record<string, a
     checkConf(baseConf);
 
     if (baseConf) {
-        console.log("⚙ Using base configuration");
+        logInfo("Using base configuration");
     }
 
     const profileConf = pkg.tsdev?.profiles?.[profile];
     checkConf(profileConf);
 
     if (profileConf) {
-        console.log(`👤 Using profile "${profile}"`);
+        logInfo(`Using profile "${profile}"`);
     }
 
     return { ...baseConf, ...profileConf };
+}
+
+export type LogLevel = "error" | "warn" | "info" | "debug";
+const levels = ["error", "warn", "info", "debug"];
+
+function baseLog(logLevel: string, messageLevel: LogLevel, emoji: string, ...message: string[]) {
+    let currentLevelIndex = levels.indexOf(logLevel);
+    const messageLevelIndex = levels.indexOf(messageLevel);
+
+    if (currentLevelIndex === -1) {
+        currentLevelIndex = levels.indexOf("info");
+    }
+
+    if (messageLevelIndex <= currentLevelIndex) {
+        console.log(emoji, ...message);
+    }
+}
+
+export function logInfo(logLevel: string, ...message: string[]) {
+    baseLog(logLevel, "info", "ℹ️", ...message);
+}
+
+export function logDebug(logLevel: string, ...message: string[]) {
+    baseLog(logLevel, "debug", "🐛", ...message);
+}
+
+export function logWarn(logLevel: string, ...message: string[]) {
+    baseLog(logLevel, "warn", "⚠️", ...message);
+}
+
+export function logError(logLevel: string, ...message: string[]) {
+    baseLog(logLevel, "error", "🔴", ...message);
 }

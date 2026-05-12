@@ -1,9 +1,8 @@
 import chokidar from "chokidar";
 import { isAbsolute, resolve } from "path";
 import type { CLIOptionsDef, TSConfigMin } from "./types.js";
-import { loadConfig } from "./util.js";
+import { loadConfig, logDebug, logInfo } from "./util.js";
 import { BaseCliOptions, DefaultBaseOptions, type BaseOptions } from "./base-options.js";
-import { glob } from "fs/promises";
 
 export interface WatchOptions extends BaseOptions {
     dir?: string;
@@ -69,10 +68,13 @@ export async function watch(
         } else {
             watchPatterns.push("dist");
         }
-        watchPatterns.push(".env", ".env.local", ".env.development", ".env.development.local");
+        watchPatterns.push(".env", ".env.*");
     }
 
     watchPatterns = watchPatterns.map((w) => (isAbsolute(w) ? w : resolve(dir, w)));
+
+    logDebug("Watch patterns:", watchPatterns.join(", "));
+    logDebug("Ignore patterns:", ignoredPatterns.join(", "));
 
     const watcher = chokidar.watch(watchPatterns, {
         ignored: ignoredPatterns,
@@ -112,16 +114,19 @@ export async function watch(
 
     watcher
         .on("add", (path) => {
+            logDebug(`Changes: File added: ${path}`);
             debounceChange();
         })
         .on("change", (path) => {
+            logDebug(`Changes: File changed: ${path}`);
             debounceChange();
         })
         .on("unlink", (path) => {
+            logDebug(`Changes: File removed: ${path}`);
             debounceChange();
         });
 
-    console.log("🔍 Watching for file changes");
+    logInfo("Watching for file changes");
 
     if (!preventInitialBuild) {
         debounceChange(true);

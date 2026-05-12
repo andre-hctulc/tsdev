@@ -16,7 +16,9 @@
         "alwaysStrict": true,
         "skipLibCheck": true,
         "outDir": "dist",
-        "verbatimModuleSyntax": true
+        "rootDir": "src",
+        "verbatimModuleSyntax": true,
+        "types": ["node"]
     },
     "include": ["src/**/*.ts"],
     "exclude": ["*.test.ts"]

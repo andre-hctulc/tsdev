@@ -23,7 +23,7 @@
     "license": "ISC",
     "devDependencies": {
         "@dotenvx/dotenvx": "^1.44.2",
-        "@types/node": "^22.14.1"
+        "@types/node": "^22.19.19"
     },
     "dependencies": {
         "chokidar": "^4.0.3",
