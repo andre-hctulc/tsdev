@@ -139,6 +139,7 @@ export function addAction<T extends object>(
     action: (options: T) => unknown,
 ) {
     cmd.action(async (options, command) => {
+        initLogLevel(options);
         if ((command?.args?.length ?? 0) > 0) {
             errorExit(`Too many arguments. Got: ${command.args.join(" ")}`);
         }
@@ -194,7 +195,12 @@ export function getDefaultOptions(profile: string | undefined): Record<string, a
 export type LogLevel = "error" | "warn" | "info" | "debug";
 const levels = ["error", "warn", "info", "debug"];
 
-function baseLog(logLevel: string, messageLevel: LogLevel, emoji: string, ...message: string[]) {
+export function initLogLevel(level: LogLevel | Record<string, any> | undefined) {
+    process.env.TSDEV_LOG_LEVEL = typeof level === "string" ? level : level?.logLevel || "info";
+}
+
+function baseLog(messageLevel: LogLevel, emoji: string, ...message: string[]) {
+    const logLevel = process.env.TSDEV_LOG_LEVEL as any;
     let currentLevelIndex = levels.indexOf(logLevel);
     const messageLevelIndex = levels.indexOf(messageLevel);
 
@@ -207,18 +213,18 @@ function baseLog(logLevel: string, messageLevel: LogLevel, emoji: string, ...mes
     }
 }
 
-export function logInfo(logLevel: string, ...message: string[]) {
-    baseLog(logLevel, "info", "ℹ️", ...message);
+export function logInfo(...message: string[]) {
+    baseLog("info", "ℹ️", ...message);
 }
 
-export function logDebug(logLevel: string, ...message: string[]) {
-    baseLog(logLevel, "debug", "🐛", ...message);
+export function logDebug(...message: string[]) {
+    baseLog("debug", "🐛", ...message);
 }
 
-export function logWarn(logLevel: string, ...message: string[]) {
-    baseLog(logLevel, "warn", "⚠️", ...message);
+export function logWarn(...message: string[]) {
+    baseLog("warn", "⚠️", ...message);
 }
 
-export function logError(logLevel: string, ...message: string[]) {
-    baseLog(logLevel, "error", "🔴", ...message);
+export function logError(...message: string[]) {
+    baseLog("error", "🔴", ...message);
 }
