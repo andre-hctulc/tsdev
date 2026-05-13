@@ -47,7 +47,6 @@ export async function dev(userOptions: DevOptions) {
     let currentAbortController: AbortController | null = null;
     let started = false;
 
-    logInfo("Building in watch mode...");
     proc("npx", ["-y", "tsc", ...tscArgs], { cwd: dir, stdio: "ignore" });
 
     watch(userOptions, async () => {
@@ -56,7 +55,6 @@ export async function dev(userOptions: DevOptions) {
         currentAbortController = abortController;
 
         if (paths.length) {
-            logInfo("Updating paths...");
             const aliasProc = proc("npx", ["-y", "tsc-alias", ...propagateOptions(tscAliasOptions)], {
                 cwd: dir,
                 signal: abortController.signal,
